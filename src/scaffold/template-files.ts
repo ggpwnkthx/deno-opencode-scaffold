@@ -8,6 +8,6 @@ import { loadTemplates } from "./template-loader.ts";
 
 export function renderTemplateFiles(
   context: TemplateContext,
-): Promise<readonly RenderedFile[]> {
+): readonly RenderedFile[] {
   return loadTemplates(context);
 }
