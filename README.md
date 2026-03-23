@@ -1,6 +1,6 @@
 # @ggpwnkthx/opencode-scaffold
 
-A Deno v2.7+ CLI that initializes a new repository with the template files you specified:
+A Deno v2.7+ CLI that initializes a new repository with template files:
 
 - `.devcontainer/`
 - `.github/`
