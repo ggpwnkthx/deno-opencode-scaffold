@@ -3,14 +3,12 @@
   "version": "0.2.5",
   "description": "A simple scaffold for projects built with OpenCode.",
   "exports": "./src/main.ts",
-  "publish": {
-    "include": [
-      "src/scaffold/templates/"
-    ]
-  },
   "imports": {
     "@scaffold/types": "./src/domain/types.ts"
   },
+  "exclude": [
+    ".*"
+  ],
   "fmt": {
     "lineWidth": 88,
     "indentWidth": 2,

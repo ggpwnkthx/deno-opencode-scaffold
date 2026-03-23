@@ -11,7 +11,7 @@ updates:
       interval: "weekly"
     labels:
       - "dependencies"
-      - " automated"
+      - "automated"
 
   - package-ecosystem: "deno"
     directory: "/"
