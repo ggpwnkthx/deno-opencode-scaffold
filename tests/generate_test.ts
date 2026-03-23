@@ -1,6 +1,7 @@
 import { assert, assertEquals, assertStringIncludes } from "jsr:@std/assert@1.0.19";
 
 import { initializeApp } from "../src/mod.ts";
+import { parseInitArgs } from "../src/lib/args.ts";
 
 Deno.test("initializeApp writes the required files and directories", async () => {
   const tempDirectory = await Deno.makeTempDir();
@@ -105,4 +106,71 @@ Deno.test("initializeApp dry-run reports files without writing", async () => {
   }
 
   assertEquals(targetExists, false);
+});
+
+Deno.test("initializeApp with targetDir '.' writes files to current directory", async () => {
+  const tempDirectory = await Deno.makeTempDir();
+  const originalCwd = Deno.cwd();
+
+  try {
+    Deno.chdir(tempDirectory);
+
+    const result = await initializeApp({
+      appName: "current-dir-app",
+      targetDir: ".",
+      scope: "@test",
+      githubUser: "test-user",
+      githubRepo: "current-dir-app",
+      codeOwner: "@test/team",
+      securityEmail: "security@test.example",
+      force: false,
+      dryRun: false,
+    });
+
+    assertEquals(result.targetDir, ".");
+    assert(result.files.length >= 20);
+
+    const readmeStat = await Deno.stat("README.md");
+    assert(readmeStat.isFile, "README.md should exist in current directory");
+  } finally {
+    Deno.chdir(originalCwd);
+  }
+});
+
+Deno.test("parseInitArgs derives app name from current directory when not provided", () => {
+  const originalCwd = Deno.cwd();
+
+  try {
+    Deno.chdir("/tmp");
+    const options = parseInitArgs([]);
+    assertEquals(options.targetDir, ".");
+    assertEquals(options.appName, "tmp");
+  } finally {
+    Deno.chdir(originalCwd);
+  }
+});
+
+Deno.test("parseInitArgs uses '.' as explicit current directory", () => {
+  const originalCwd = Deno.cwd();
+
+  try {
+    Deno.chdir("/tmp");
+    const options = parseInitArgs(["."]);
+    assertEquals(options.targetDir, ".");
+    assertEquals(options.appName, "tmp");
+  } finally {
+    Deno.chdir(originalCwd);
+  }
+});
+
+Deno.test("parseInitArgs normalizes underscores to hyphens in app names", () => {
+  const originalCwd = Deno.cwd();
+
+  try {
+    Deno.chdir("/tmp");
+    const options = parseInitArgs(["my_underscore_app"]);
+    assertEquals(options.appName, "my-underscore-app");
+  } finally {
+    Deno.chdir(originalCwd);
+  }
 });

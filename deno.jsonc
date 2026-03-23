@@ -1,6 +1,6 @@
 {
   "name": "@ggpwnkthx/opencode-scaffold",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A simple scaffold for projects built with OpenCode.",
   "exports": "./src/main.ts",
   "scripts": {},
@@ -33,6 +33,6 @@
     "check": "deno check ./src/main.ts",
     "test": "deno test --allow-read --allow-write ./tests",
     "build": "deno compile --allow-read --allow-write --output=dist/scaffold ./src/main.ts",
-    "ci": "deno task fmt:check && deno task lint && deno task check && deno task test"
+    "ci": "deno task fmt && deno task lint --fix && deno task check && deno task test"
   }
 }

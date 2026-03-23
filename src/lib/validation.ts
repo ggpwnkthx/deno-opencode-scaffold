@@ -23,6 +23,10 @@ export function validateAppName(appName: string): string {
   const normalizedAppName = requireNonEmpty(appName, "appName").toLowerCase();
 
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalizedAppName)) {
+    const withUnderscoresNormalized = normalizedAppName.replace(/_/g, "-");
+    if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(withUnderscoresNormalized)) {
+      return withUnderscoresNormalized;
+    }
     throw new ValidationError(
       "appName must use lowercase letters, digits, and hyphens only.",
       { appName: normalizedAppName },

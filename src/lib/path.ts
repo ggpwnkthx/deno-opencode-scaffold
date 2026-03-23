@@ -41,3 +41,17 @@ export function dirname(path: string): string {
 
   return path.slice(0, lastSeparatorIndex);
 }
+
+/**
+ * Returns the final component of a path (e.g., "/home/user/my-project" → "my-project").
+ */
+export function basename(path: string): string {
+  const normalizedPath = path.replace(/\\+/g, "/").replace(/\/+$/, "");
+  const lastSlashIndex = Math.max(normalizedPath.lastIndexOf("/"));
+
+  if (lastSlashIndex < 0) {
+    return normalizedPath;
+  }
+
+  return normalizedPath.slice(lastSlashIndex + 1);
+}

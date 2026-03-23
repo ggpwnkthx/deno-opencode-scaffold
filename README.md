@@ -16,8 +16,22 @@ It also creates a small `src/`, `tests/`, `benchmarks/`, and `examples/` tree in
 
 ## Usage
 
+Initialize in a new directory:
+
 ```bash
 deno run --allow-read --allow-write jsr:@ggpwnkthx/opencode-scaffold init my-app
+```
+
+Initialize in the current directory (uses the directory name as the app name):
+
+```bash
+deno run --allow-read --allow-write jsr:@ggpwnkthx/opencode-scaffold init
+```
+
+Initialize in the current directory explicitly:
+
+```bash
+deno run --allow-read --allow-write jsr:@ggpwnkthx/opencode-scaffold init .
 ```
 
 With options:
@@ -30,6 +44,8 @@ deno run --allow-read --allow-write jsr:@ggpwnkthx/opencode-scaffold init my-app
   --codeowner @acme/platform \
   --security-email security@acme.test
 ```
+
+Note: Underscores in app names are normalized to hyphens (e.g., `my_app` becomes `my-app`).
 
 ### Flags
 

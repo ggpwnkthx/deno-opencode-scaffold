@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-03-23
+
+### Added
+
+- `basename()` helper function in `src/lib/path.ts` for extracting directory names from paths
+
+### Changed
+
+- CLI now initializes in current directory when app name is omitted or passed as `.`
+- App name is derived from current directory name when not provided
+- Underscores in app names are normalized to hyphens (e.g., `my_app` becomes `my-app`)
+- Updated README with new usage examples for current directory initialization
+
+### Fixed
+
+- `ensureWritableTarget()` now properly handles `targetDir === "."` without attempting to create the directory
 
 ## [0.2.0] - 2026-03-23
 
@@ -18,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Template system refactored to use dynamic template loading via `loadTemplates()`
+
 ## [0.1.0] - 2026-03-23
 
 ### Added

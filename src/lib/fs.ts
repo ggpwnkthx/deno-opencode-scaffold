@@ -53,6 +53,17 @@ export async function ensureWritableTarget(
   targetDir: string,
   force: boolean,
 ): Promise<void> {
+  if (targetDir === ".") {
+    const empty = await isDirectoryEmpty(".");
+    if (!empty && !force) {
+      throw new DirectoryConflictError(
+        "The current directory is not empty. Re-run with --force to allow writing into it.",
+        { targetDir },
+      );
+    }
+    return;
+  }
+
   const exists = await pathExists(targetDir);
   if (!exists) {
     await Deno.mkdir(targetDir, { recursive: true });

@@ -13,6 +13,7 @@ import {
   validateSecurityEmail,
   validateTargetDir,
 } from "./validation.ts";
+import { basename } from "./path.ts";
 import { ValidationError } from "../domain/errors.ts";
 
 interface RawFlags {
@@ -38,8 +39,12 @@ const DEFAULT_CODEOWNER = "@ggpwnkthx";
 export const HELP_TEXT = `deno-app-scaffold-cli
 
 Usage:
-  scaffold init <app-name> [--dir <path>] [options]
+  scaffold init [app-name] [--dir <path>] [options]
   scaffold help
+
+Description:
+  Initialize a new Deno project. If app-name is omitted, uses the current
+  directory name. Use "." to explicitly initialize in the current directory.
 
 Options:
   --scope <@scope>             JSR scope used in generated docs
@@ -140,12 +145,13 @@ export function parseInitArgs(args: readonly string[]): InitCommandOptions {
   }
 
   const [appNameValue] = positionalArgs;
-  if (!appNameValue) {
-    throw new ValidationError("Missing required app name.\n\n" + HELP_TEXT);
+  let appName: string;
+  if (appNameValue === undefined || appNameValue === ".") {
+    appName = basename(Deno.cwd());
+  } else {
+    appName = validateAppName(appNameValue);
   }
-
-  const appName = validateAppName(appNameValue);
-  const targetDir = validateTargetDir(flags.dir ?? appName);
+  const targetDir = validateTargetDir(flags.dir ?? ".");
 
   return {
     appName,
