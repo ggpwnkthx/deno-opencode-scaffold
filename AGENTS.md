@@ -81,11 +81,11 @@ Required permissions vary by functionality. Document all `--allow-*` flags used:
 
 ### Naming Conventions
 
-- **Files**: kebab-case (`my-file.ts`)
-- **Types/Interfaces**: PascalCase (`MyType`, `IMyInterface`)
-- **Functions/Methods**: camelCase (`myFunction`)
-- **Constants**: SCREAMING_SNAKE_CASE for compile-time constants
-- **Enums**: PascalCase with UPPER values
+- **Files**: Use kebab-case (`user-profile.ts`, `build-config.ts`, `http-client.test.ts`)
+- **Types/Interfaces**: Use PascalCase (`UserProfile`, `BuildConfig`, `IAuthProvider`)
+- **Functions/Methods**: Use camelCase (`createConfig`, `parseUserInput`, `getRetryDelay`)
+- **Constants**: Use SCREAMING_SNAKE_CASE for compile-time constants (`DEFAULT_TIMEOUT_MS`, `MAX_RETRY_ATTEMPTS`)
+- **Enums**: Use PascalCase for enum names and SCREAMING_SNAKE_CASE for enum members (`LogLevel.ERROR`, `RequestStatus.SUCCESS`)
 
 ## Documentation Standards
 
