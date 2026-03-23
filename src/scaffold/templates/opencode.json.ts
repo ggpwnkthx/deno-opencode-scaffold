@@ -1,0 +1,26 @@
+import type { TemplateContext } from "@scaffold/types";
+
+export const metadata = { outputPath: "opencode.json" };
+
+export default function (_context: TemplateContext): string {
+  return `{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "minimax": {
+      "npm": "@ai-sdk/anthropic",
+      "models": {
+        "MiniMax-M2.7": {
+          "name": "MiniMax-M2.7"
+        }
+      }
+    }
+  },
+  "formatter": {
+    "deno-fmt": {
+      "command": ["deno", "fmt", "$FILE"],
+      "extensions": [".ts", ".tsx"]
+    }
+  }
+}
+`;
+}

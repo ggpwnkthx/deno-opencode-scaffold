@@ -7,7 +7,7 @@ import type {
   InitCommandOptions,
   RenderedFile,
   TemplateContext,
-} from "../domain/types.ts";
+} from "@scaffold/types";
 import { joinFsPath } from "../lib/path.ts";
 import { ensureWritableTarget, writeTextFile } from "../lib/fs.ts";
 import { renderTemplateFiles } from "./template-files.ts";
@@ -45,11 +45,11 @@ export function createTemplateContext(
 /**
  * Returns all rendered files for a scaffold request.
  */
-export function buildRenderedFiles(
+export async function buildRenderedFiles(
   options: InitCommandOptions,
-): readonly RenderedFile[] {
+): Promise<readonly RenderedFile[]> {
   const context = createTemplateContext(options);
-  return renderTemplateFiles(context);
+  return await renderTemplateFiles(context);
 }
 
 /**
@@ -58,7 +58,7 @@ export function buildRenderedFiles(
 export async function initializeApp(
   options: InitCommandOptions,
 ): Promise<ScaffoldResult> {
-  const renderedFiles = buildRenderedFiles(options);
+  const renderedFiles = await buildRenderedFiles(options);
 
   if (!options.dryRun) {
     await ensureWritableTarget(options.targetDir, options.force);

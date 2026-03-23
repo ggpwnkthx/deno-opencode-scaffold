@@ -1,0 +1,35 @@
+import type { TemplateContext } from "@scaffold/types";
+
+export const metadata = { outputPath: ".github/workflows/ci.yml" };
+
+export default function (_context: TemplateContext): string {
+  return `name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: "2.7.7"
+
+      - run: deno task ci
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+`;
+}

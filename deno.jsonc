@@ -1,12 +1,15 @@
 {
   "name": "@ggpwnkthx/opencode-scaffold",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A simple scaffold for projects built with OpenCode.",
   "exports": "./src/main.ts",
   "scripts": {},
   "exclude": [
     ".*"
   ],
+  "imports": {
+    "@scaffold/types": "./src/domain/types.ts"
+  },
   "fmt": {
     "lineWidth": 88,
     "indentWidth": 2,

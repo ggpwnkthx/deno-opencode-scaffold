@@ -3,7 +3,7 @@
  * @module
  */
 
-import type { InitCommandOptions } from "../domain/types.ts";
+import type { InitCommandOptions } from "@scaffold/types";
 import {
   validateAppName,
   validateCodeOwner,
