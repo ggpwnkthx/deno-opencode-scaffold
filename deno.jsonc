@@ -5,7 +5,10 @@
   "exports": "./src/main.ts",
   "scripts": {},
   "exclude": [
-    "./.*"
+    ".devcontainer",
+    ".github",
+    ".opencode",
+    ".vscode"
   ],
   "publish": {
     "include": [
