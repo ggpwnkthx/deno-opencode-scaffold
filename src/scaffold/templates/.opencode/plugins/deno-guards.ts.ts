@@ -13,8 +13,8 @@ export const DenoEnforcePlugin: Plugin = async ({ $, worktree }) => {
     if (running) return;
     running = true;
     try {
-      await \$\`cd \${worktree} && deno lint\`;
-      await \$\`cd \${worktree} && deno check\`;
+      await \$\`deno lint\`;
+      await \$\`deno check\`;
       console.log("[opencode] deno lint + deno check passed");
     } catch (err) {
       console.error("[opencode] Deno validation failed:", err);
