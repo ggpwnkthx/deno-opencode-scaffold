@@ -8,6 +8,10 @@ export default function (_context: TemplateContext): string {
   "provider": {
     "minimax": {
       "npm": "@ai-sdk/anthropic",
+      "options": {
+        "baseURL": "https://api.minimax.io/anthropic/v1",
+        "apiKey": "{env:MINIMAX_API_KEY}"
+      },
       "models": {
         "MiniMax-M2.7": {
           "name": "MiniMax-M2.7"
@@ -15,6 +19,7 @@ export default function (_context: TemplateContext): string {
       }
     }
   },
+  "model": "minimax/MiniMax-M2.7",
   "formatter": {
     "deno-fmt": {
       "command": ["deno", "fmt", "$FILE"],

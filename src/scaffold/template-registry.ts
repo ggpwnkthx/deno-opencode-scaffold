@@ -23,7 +23,7 @@ import * as DENO_JSONC from "./templates/deno-jsonc.ts";
 import * as EXAMPLES_BASIC from "./templates/examples/basic.ts.ts";
 import * as GITATTRIBUTES from "./templates/gitattributes.ts";
 import * as GITIGNORE from "./templates/gitignore.ts";
-import * as OPENCODE_JSON from "./templates/opencode.json.ts";
+import * as OPENCODE_JSON from "./templates/.opencode/settings.json.ts";
 import * as SRC_CORE_CONFIG from "./templates/src/core/config.ts.ts";
 import * as SRC_MOD from "./templates/src/mod.ts.ts";
 import * as TESTS_CORE_CONFIG from "./templates/tests/core/config.test.ts.ts";
@@ -32,7 +32,8 @@ import * as DEVCONTAINER_DEVCONTAINER_JSON from "./templates/.devcontainer/devco
 import * as GITHUB_CODEOWNERS from "./templates/.github/CODEOWNERS.ts";
 import * as GITHUB_DEPENDABOT from "./templates/.github/dependabot.yml.ts";
 import * as GITHUB_WORKFLOWS_CI from "./templates/.github/workflows/ci.yml.ts";
-import * as OPENCODE_PLUGINS_DENO_GUARDS from "./templates/.opencode/plugins/deno-guards.ts.ts";
+import * as OPENCODE_PLUGINS_DENO_GUARDS from "./templates/.opencode/plugins/deno-guards.ts";
+import * as OPENCODE_PLUGINS_CODE_GRADE from "./templates/.opencode/plugins/code-grade.ts";
 import * as VSCODE_EXTENSIONS from "./templates/.vscode/extensions.json.ts";
 import * as VSCODE_SETTINGS from "./templates/.vscode/settings.json.ts";
 
@@ -67,6 +68,10 @@ const templateModules: TemplateModule[] = [
   {
     metadata: OPENCODE_PLUGINS_DENO_GUARDS.metadata,
     default: OPENCODE_PLUGINS_DENO_GUARDS.default,
+  },
+  {
+    metadata: OPENCODE_PLUGINS_CODE_GRADE.metadata,
+    default: OPENCODE_PLUGINS_CODE_GRADE.default,
   },
   { metadata: VSCODE_EXTENSIONS.metadata, default: VSCODE_EXTENSIONS.default },
   { metadata: VSCODE_SETTINGS.metadata, default: VSCODE_SETTINGS.default },
@@ -105,7 +110,7 @@ export const templatePaths = [
   "./templates/examples/basic.ts.ts",
   "./templates/gitattributes.ts",
   "./templates/gitignore.ts",
-  "./templates/opencode.json.ts",
+  "./templates/.opencode/settings.json.ts",
   "./templates/src/core/config.ts.ts",
   "./templates/src/mod.ts.ts",
   "./templates/tests/core/config.test.ts.ts",
@@ -114,7 +119,8 @@ export const templatePaths = [
   "./templates/.github/CODEOWNERS.ts",
   "./templates/.github/dependabot.yml.ts",
   "./templates/.github/workflows/ci.yml.ts",
-  "./templates/.opencode/plugins/deno-guards.ts.ts",
+  "./templates/.opencode/plugins/deno-guards.ts",
+  "./templates/.opencode/plugins/code-grade.ts",
   "./templates/.vscode/extensions.json.ts",
   "./templates/.vscode/settings.json.ts",
 ] as const;
