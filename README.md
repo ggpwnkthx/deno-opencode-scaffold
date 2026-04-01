@@ -45,6 +45,8 @@ deno run --allow-read --allow-write ./src/main.ts init my-app \
   --security-email security@acme.test
 ```
 
+Interactive mode: when run in a terminal without all required flags, the CLI will prompt for missing values. In non-interactive environments (piped stdin, CI), missing required flags produce a helpful error message with the exact flag to use.
+
 Note: Underscores in app names are normalized to hyphens (e.g., `my_app` becomes `my-app`).
 
 ### Flags

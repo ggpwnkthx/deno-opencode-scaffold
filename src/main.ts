@@ -4,7 +4,13 @@
  */
 
 import { AppError, ValidationError } from "./domain/errors.ts";
-import { HELP_TEXT, isHelpCommand, parseInitArgs } from "./lib/args.ts";
+import {
+  createInteractivePromptProvider,
+  HELP_TEXT,
+  isHelpCommand,
+  parseInitArgs,
+} from "./lib/args.ts";
+import { isInteractive } from "./lib/prompt.ts";
 import { initializeApp } from "./scaffold/generate.ts";
 
 function formatSummary(result: Awaited<ReturnType<typeof initializeApp>>): string {
@@ -32,7 +38,10 @@ async function run(argv: readonly string[]): Promise<number> {
     throw new ValidationError(`Unknown command: ${command}\n\n${HELP_TEXT}`);
   }
 
-  const options = parseInitArgs(rest);
+  const promptProvider = isInteractive()
+    ? createInteractivePromptProvider()
+    : undefined;
+  const options = await parseInitArgs(rest, promptProvider);
   const result = await initializeApp(options);
 
   console.log(formatSummary(result));

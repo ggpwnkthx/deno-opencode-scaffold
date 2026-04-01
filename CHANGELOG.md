@@ -5,7 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.14] - 2026-04-01
+## [0.2.15] - 2026-04-01
+
+### Added
+
+- Interactive prompting for missing values: when run in a terminal without all required flags, the CLI now prompts for `--scope`, `--github-user`, `--github-repo`, `--codeowner`, and `--security-email`
+- `PromptProvider` interface and `createInteractivePromptProvider()` for injectable prompting, enabling testability
+- `isInteractive()` check to detect TTY stdin and avoid prompts in non-interactive (piped/CI) environments
+- `resolveArg()` helper for consistent three-branch argument resolution: use flag → prompt → throw with actionable error message
+- `promptWithValidation()` loop that re-prompts on validation errors until valid input is received
+- `ReadLineResult` interface with `{ value, truncated }` for explicit truncation signaling
+- `joinBytes()` utility for pre-allocating byte array concatenation with optional pre-computed length
+- Helpful `ValidationError` messages for missing flags in non-interactive mode (e.g., `"Missing --scope. Provide via flag (--scope @my-scope) or run in an interactive terminal."`)
+
+### Changed
+
+- `parseInitArgs()` is now `async` to support interactive prompting
+- Error messages for missing required flags now include concrete flag examples
+
+### Fixed
+
+- Fixed buffer truncation risk in `readLine()`: replaced fixed 1024-byte buffer with a streaming read loop accumulating chunks until newline or `MAX_LINE_LENGTH` (4096)
+- Fixed O(n) accumulation in `joinBytes()`: hot path now passes pre-computed total length, avoiding per-call `reduce()`
+- Improved test coverage: added tests for `parseFlags` error paths, `parseInitArgs` prompt and non-interactive paths, and `joinBytes` behavior
+
+### Tests
+
+- 51 tests total (up from 40), covering prompt path, non-interactive error path, flag parsing, and `joinBytes` unit behavior
 
 ### Added
 

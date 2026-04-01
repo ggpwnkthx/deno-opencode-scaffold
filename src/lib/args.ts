@@ -15,6 +15,54 @@ import {
 } from "./validation.ts";
 import { basename } from "./path.ts";
 import { ValidationError } from "../domain/errors.ts";
+import { promptWithValidation } from "./prompt.ts";
+
+// === Prompt provider ===
+
+export interface PromptProvider {
+  scope: (defaultValue: string) => Promise<string>;
+  githubUser: (defaultValue: string) => Promise<string>;
+  githubRepo: (defaultValue: string) => Promise<string>;
+  codeOwner: (defaultValue: string) => Promise<string>;
+  securityEmail: (defaultValue: string) => Promise<string>;
+}
+
+export function createInteractivePromptProvider(): PromptProvider {
+  return {
+    scope: (defaultValue) =>
+      promptWithValidation(
+        "Enter your JSR scope (e.g., @my-scope)",
+        validateScope,
+        defaultValue,
+      ),
+    githubUser: (defaultValue) =>
+      promptWithValidation(
+        "Enter your GitHub username or organization",
+        validateGithubUser,
+        defaultValue,
+      ),
+    githubRepo: (defaultValue) =>
+      promptWithValidation(
+        "Enter the repository name",
+        validateGithubRepo,
+        defaultValue,
+      ),
+    codeOwner: (defaultValue) =>
+      promptWithValidation(
+        "Enter the CODEOWNERS handle (e.g., @user or @org/team)",
+        validateCodeOwner,
+        defaultValue,
+      ),
+    securityEmail: (defaultValue) =>
+      promptWithValidation(
+        "Enter the security contact email",
+        validateSecurityEmail,
+        defaultValue,
+      ),
+  };
+}
+
+// === Flag parsing ===
 
 interface RawFlags {
   dir?: string;
@@ -28,11 +76,6 @@ interface RawFlags {
   help: boolean;
   noConfig: boolean;
 }
-
-const DEFAULT_SCOPE = "@your-scope";
-const DEFAULT_GITHUB_USER = "your-github-user";
-const DEFAULT_SECURITY_EMAIL = "security@example.com";
-const DEFAULT_CODEOWNER = "@ggpwnkthx";
 
 /**
  * Help text displayed by the CLI.
@@ -75,7 +118,7 @@ function consumeFlagValue(
   return value;
 }
 
-function parseFlags(
+export function parseFlags(
   args: readonly string[],
 ): { flags: RawFlags; consumed: Set<number> } {
   const flags: RawFlags = {
@@ -139,10 +182,46 @@ function parseFlags(
   return { flags, consumed };
 }
 
+// === Argument resolution ===
+
+type FlagExampleKey = keyof PromptProvider;
+
+const EXAMPLES: Record<FlagExampleKey, string> = {
+  scope: "--scope @my-scope",
+  githubUser: "--github-user myuser",
+  githubRepo: "--github-repo my-repo",
+  codeOwner: "--codeowner @myuser",
+  securityEmail: "--security-email security@example.com",
+} as const;
+
+async function resolveArg(
+  flagName: FlagExampleKey,
+  flagValue: string | undefined,
+  promptFn: (() => Promise<string>) | undefined,
+): Promise<string> {
+  if (flagValue !== undefined) {
+    return flagValue;
+  }
+  if (promptFn) {
+    return await promptFn();
+  }
+  throw new ValidationError(
+    `Missing --${flagName}. Provide via flag (${
+      EXAMPLES[flagName]
+    }) or run in an interactive terminal.`,
+    { flag: flagName },
+  );
+}
+
 /**
  * Parses CLI arguments into validated init options.
+ * When not running interactively or when promptProvider is undefined,
+ * missing values will cause an error instead of prompting.
  */
-export function parseInitArgs(args: readonly string[]): InitCommandOptions {
+export async function parseInitArgs(
+  args: readonly string[],
+  promptProvider?: PromptProvider,
+): Promise<InitCommandOptions> {
   const { flags, consumed } = parseFlags(args);
   const positionalArgs = args.filter((_, index) => !consumed.has(index));
 
@@ -159,16 +238,46 @@ export function parseInitArgs(args: readonly string[]): InitCommandOptions {
   }
   const targetDir = validateTargetDir(flags.dir ?? ".");
 
+  const scope = await resolveArg(
+    "scope",
+    flags.scope,
+    promptProvider ? () => promptProvider.scope("@your-scope") : undefined,
+  );
+
+  const githubUser = await resolveArg(
+    "githubUser",
+    flags.githubUser,
+    promptProvider ? () => promptProvider.githubUser("your-github-user") : undefined,
+  );
+
+  const githubRepo = await resolveArg(
+    "githubRepo",
+    flags.githubRepo,
+    promptProvider ? () => promptProvider.githubRepo(appName) : undefined,
+  );
+
+  const codeOwner = await resolveArg(
+    "codeOwner",
+    flags.codeOwner,
+    promptProvider ? () => promptProvider.codeOwner("@ggpwnkthx") : undefined,
+  );
+
+  const securityEmail = await resolveArg(
+    "securityEmail",
+    flags.securityEmail,
+    promptProvider
+      ? () => promptProvider.securityEmail("security@example.com")
+      : undefined,
+  );
+
   return {
     appName,
     targetDir,
-    scope: validateScope(flags.scope ?? DEFAULT_SCOPE),
-    githubUser: validateGithubUser(flags.githubUser ?? DEFAULT_GITHUB_USER),
-    githubRepo: validateGithubRepo(flags.githubRepo ?? appName),
-    codeOwner: validateCodeOwner(flags.codeOwner ?? DEFAULT_CODEOWNER),
-    securityEmail: validateSecurityEmail(
-      flags.securityEmail ?? DEFAULT_SECURITY_EMAIL,
-    ),
+    scope,
+    githubUser,
+    githubRepo,
+    codeOwner,
+    securityEmail,
     force: flags.force,
     dryRun: flags.dryRun,
     includeConfig: !flags.noConfig,

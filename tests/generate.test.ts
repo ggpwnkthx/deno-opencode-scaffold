@@ -1,7 +1,8 @@
 import { assert, assertEquals, assertStringIncludes } from "jsr:@std/assert@1.0.19";
 
 import { initializeApp } from "../src/mod.ts";
-import { parseInitArgs } from "../src/lib/args.ts";
+import { parseFlags, parseInitArgs } from "../src/lib/args.ts";
+import { ValidationError } from "../src/domain/errors.ts";
 
 Deno.test("initializeApp writes the required files and directories", async () => {
   const tempDirectory = await Deno.makeTempDir();
@@ -142,12 +143,25 @@ Deno.test("initializeApp with targetDir '.' writes files to current directory", 
   }
 });
 
-Deno.test("parseInitArgs derives app name from current directory when not provided", () => {
+Deno.test("parseInitArgs derives app name from current directory when not provided", async () => {
   const originalCwd = Deno.cwd();
 
   try {
     Deno.chdir("/tmp");
-    const options = parseInitArgs([]);
+    const options = await parseInitArgs(
+      [
+        "--scope",
+        "@test",
+        "--github-user",
+        "testuser",
+        "--github-repo",
+        "test-repo",
+        "--codeowner",
+        "@test",
+        "--security-email",
+        "test@example.com",
+      ],
+    );
     assertEquals(options.targetDir, ".");
     assertEquals(options.appName, "tmp");
   } finally {
@@ -155,12 +169,26 @@ Deno.test("parseInitArgs derives app name from current directory when not provid
   }
 });
 
-Deno.test("parseInitArgs uses '.' as explicit current directory", () => {
+Deno.test("parseInitArgs uses '.' as explicit current directory", async () => {
   const originalCwd = Deno.cwd();
 
   try {
     Deno.chdir("/tmp");
-    const options = parseInitArgs(["."]);
+    const options = await parseInitArgs(
+      [
+        ".",
+        "--scope",
+        "@test",
+        "--github-user",
+        "testuser",
+        "--github-repo",
+        "test-repo",
+        "--codeowner",
+        "@test",
+        "--security-email",
+        "test@example.com",
+      ],
+    );
     assertEquals(options.targetDir, ".");
     assertEquals(options.appName, "tmp");
   } finally {
@@ -168,25 +196,68 @@ Deno.test("parseInitArgs uses '.' as explicit current directory", () => {
   }
 });
 
-Deno.test("parseInitArgs normalizes underscores to hyphens in app names", () => {
+Deno.test("parseInitArgs normalizes underscores to hyphens in app names", async () => {
   const originalCwd = Deno.cwd();
 
   try {
     Deno.chdir("/tmp");
-    const options = parseInitArgs(["my_underscore_app"]);
+    const options = await parseInitArgs(
+      [
+        "my_underscore_app",
+        "--scope",
+        "@test",
+        "--github-user",
+        "testuser",
+        "--github-repo",
+        "test-repo",
+        "--codeowner",
+        "@test",
+        "--security-email",
+        "test@example.com",
+      ],
+    );
     assertEquals(options.appName, "my-underscore-app");
   } finally {
     Deno.chdir(originalCwd);
   }
 });
 
-Deno.test("parseInitArgs defaults includeConfig to true", () => {
-  const options = parseInitArgs(["my-app"]);
+Deno.test("parseInitArgs defaults includeConfig to true", async () => {
+  const options = await parseInitArgs(
+    [
+      "my-app",
+      "--scope",
+      "@test",
+      "--github-user",
+      "testuser",
+      "--github-repo",
+      "test-repo",
+      "--codeowner",
+      "@test",
+      "--security-email",
+      "test@example.com",
+    ],
+  );
   assertEquals(options.includeConfig, true);
 });
 
-Deno.test("parseInitArgs sets includeConfig to false when --no-config is passed", () => {
-  const options = parseInitArgs(["my-app", "--no-config"]);
+Deno.test("parseInitArgs sets includeConfig to false when --no-config is passed", async () => {
+  const options = await parseInitArgs(
+    [
+      "my-app",
+      "--no-config",
+      "--scope",
+      "@test",
+      "--github-user",
+      "testuser",
+      "--github-repo",
+      "test-repo",
+      "--codeowner",
+      "@test",
+      "--security-email",
+      "test@example.com",
+    ],
+  );
   assertEquals(options.includeConfig, false);
 });
 
@@ -308,4 +379,134 @@ Deno.test("initializeApp with includeConfig false generates fewer files than wit
     3,
     "difference should be exactly 3 (config.ts, config.test.ts, config.bench.ts)",
   );
+});
+
+Deno.test("parseInitArgs throws with helpful message when missing required flags in non-interactive mode", async () => {
+  try {
+    await parseInitArgs(["my-app"]);
+    assert(false, "Expected ValidationError to be thrown");
+  } catch (error) {
+    assert(error instanceof ValidationError);
+    assertStringIncludes(error.message, "Missing --scope. Provide via flag");
+  }
+});
+
+Deno.test("parseInitArgs throws with helpful message for githubUser", async () => {
+  try {
+    await parseInitArgs(
+      [
+        "my-app",
+        "--scope",
+        "@test",
+        "--github-repo",
+        "test-repo",
+        "--codeowner",
+        "@test",
+        "--security-email",
+        "test@example.com",
+      ],
+    );
+    assert(false, "Expected ValidationError to be thrown");
+  } catch (error) {
+    assert(error instanceof ValidationError);
+    assertStringIncludes(error.message, "Missing --githubUser. Provide via flag");
+  }
+});
+
+Deno.test("parseInitArgs uses prompted values when no flags provided but PromptProvider given", async () => {
+  const mockProvider = {
+    scope: () => Promise.resolve("@mock-scope"),
+    githubUser: () => Promise.resolve("mock-user"),
+    githubRepo: () => Promise.resolve("mock-repo"),
+    codeOwner: () => Promise.resolve("@mock-owner"),
+    securityEmail: () => Promise.resolve("mock@example.com"),
+  };
+
+  const options = await parseInitArgs([], mockProvider);
+
+  assertEquals(options.scope, "@mock-scope");
+  assertEquals(options.githubUser, "mock-user");
+  assertEquals(options.githubRepo, "mock-repo");
+  assertEquals(options.codeOwner, "@mock-owner");
+  assertEquals(options.securityEmail, "mock@example.com");
+});
+
+Deno.test("parseInitArgs prefers flag values over PromptProvider values", async () => {
+  const mockProvider = {
+    scope: () => Promise.resolve("@mock-scope"),
+    githubUser: () => Promise.resolve("mock-user"),
+    githubRepo: () => Promise.resolve("mock-repo"),
+    codeOwner: () => Promise.resolve("@mock-owner"),
+    securityEmail: () => Promise.resolve("mock@example.com"),
+  };
+
+  const options = await parseInitArgs(
+    [
+      "--scope",
+      "@from-flag",
+      "--github-user",
+      "from-flag-user",
+      "--github-repo",
+      "from-flag-repo",
+      "--codeowner",
+      "@from-flag-owner",
+      "--security-email",
+      "flag@example.com",
+    ],
+    mockProvider,
+  );
+
+  assertEquals(options.scope, "@from-flag");
+  assertEquals(options.githubUser, "from-flag-user");
+  assertEquals(options.githubRepo, "from-flag-repo");
+  assertEquals(options.codeOwner, "@from-flag-owner");
+  assertEquals(options.securityEmail, "flag@example.com");
+});
+
+Deno.test("parseInitArgs githubRepo prompt receives derived appName as defaultValue", async () => {
+  let receivedDefault: string | undefined;
+  const mockProvider = {
+    scope: () => Promise.resolve("@test"),
+    githubUser: () => Promise.resolve("test-user"),
+    githubRepo: (defaultValue: string) => {
+      receivedDefault = defaultValue;
+      return Promise.resolve("test-repo");
+    },
+    codeOwner: () => Promise.resolve("@test"),
+    securityEmail: () => Promise.resolve("test@example.com"),
+  };
+
+  await parseInitArgs(["my-app"], mockProvider);
+
+  assertEquals(receivedDefault, "my-app");
+});
+
+Deno.test("parseFlags throws when given an unknown flag", () => {
+  try {
+    parseFlags(["--unknown-flag"]);
+    assert(false, "Expected ValidationError to be thrown");
+  } catch (error) {
+    assert(error instanceof ValidationError);
+    assertStringIncludes(error.message, "Unknown flag: --unknown-flag");
+  }
+});
+
+Deno.test("parseFlags throws when a flag value is missing", () => {
+  try {
+    parseFlags(["--scope"]);
+    assert(false, "Expected ValidationError to be thrown");
+  } catch (error) {
+    assert(error instanceof ValidationError);
+    assertStringIncludes(error.message, "Missing value for --scope");
+  }
+});
+
+Deno.test("parseFlags throws when flag value looks like a flag", () => {
+  try {
+    parseFlags(["--scope", "--another"]);
+    assert(false, "Expected ValidationError to be thrown");
+  } catch (error) {
+    assert(error instanceof ValidationError);
+    assertStringIncludes(error.message, "Missing value for --scope");
+  }
 });
