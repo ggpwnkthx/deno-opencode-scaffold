@@ -1,6 +1,6 @@
 {
   "name": "@ggpwnkthx/opencode-scaffold",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "A simple scaffold for projects built with OpenCode.",
   "exports": "./src/main.ts",
   "imports": {
