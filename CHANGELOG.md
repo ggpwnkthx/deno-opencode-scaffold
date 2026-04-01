@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.12] - 2026-04-01
+
+### Fixed
+
+- Fixed GitHub username validation regex to properly reject usernames ending with hyphen
+- Fixed template literal syntax in `deno-guards.ts` plugin template (`\{` → `${`)
+- Fixed `AppError.details` property to be non-writable via `Object.defineProperty`
+
+### Changed
+
+- Removed `coverage` and `coverage:check` tasks from scaffold templates
+- Removed `fmt:check` task from scaffold deno.jsonc template
+
 ## [0.2.11] - 2026-04-01
 
 ### Changed

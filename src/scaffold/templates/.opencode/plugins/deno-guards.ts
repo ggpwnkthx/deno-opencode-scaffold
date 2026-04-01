@@ -5,7 +5,7 @@ export const metadata = { outputPath: ".opencode/plugins/deno-guards.ts" };
 export default function (_context: TemplateContext): string {
   return `import type { Plugin } from "@opencode-ai/plugin";
   
-  export const DenoEnforcePlugin: Plugin = async ({ \, client, worktree }) => {
+  export const DenoEnforcePlugin: Plugin = async ({ $, client, worktree }) => {
     let changed = false;
     let running = false;
   
@@ -28,21 +28,21 @@ export default function (_context: TemplateContext): string {
       if (running) return;
       running = true;
   
-      const cacheDir = \`\{worktree}/.opencode/.cache\`;
-      const lintLog = \`\{cacheDir}/deno-lint.log\`;
-      const checkLog = \`\{cacheDir}/deno-check.log\`;
+      const cacheDir = \`\${worktree}/.opencode/.cache\`;
+      const lintLog = \`\${cacheDir}/deno-lint.log\`;
+      const checkLog = \`\${cacheDir}/deno-check.log\`;
   
       try {
-        await \`mkdir -p \{cacheDir}\`.quiet();
+        await $\`mkdir -p \${cacheDir}\`.quiet();
   
-        await \`deno lint &> \{lintLog}\`.cwd(worktree).quiet();
-        await \`deno check &> \{checkLog}\`.cwd(worktree).quiet();
+        await $\`deno lint &> \${lintLog}\`.cwd(worktree).quiet();
+        await $\`deno check &> \${checkLog}\`.cwd(worktree).quiet();
   
         await log("info", "deno lint + deno check passed");
       } catch (err) {
         const [lintOutput, checkOutput] = await Promise.all([
-          \`cat \{lintLog}\`.quiet().text().catch(() => ""),
-          \`cat \{checkLog}\`.quiet().text().catch(() => ""),
+          $\`cat \${lintLog}\`.quiet().text().catch(() => ""),
+          $\`cat \${checkLog}\`.quiet().text().catch(() => ""),
         ]);
   
         await log("error", "Deno validation failed", {

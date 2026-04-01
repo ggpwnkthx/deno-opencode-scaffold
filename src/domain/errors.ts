@@ -17,7 +17,7 @@ export type AppErrorCode =
  */
 export class AppError extends Error {
   readonly code: AppErrorCode;
-  readonly details: Record<string, string>;
+  details!: Record<string, string>;
 
   constructor(
     code: AppErrorCode,
@@ -27,7 +27,12 @@ export class AppError extends Error {
     super(message);
     this.name = "AppError";
     this.code = code;
-    this.details = details;
+    Object.defineProperty(this, "details", {
+      value: details,
+      writable: false,
+      enumerable: true,
+      configurable: false,
+    });
   }
 }
 

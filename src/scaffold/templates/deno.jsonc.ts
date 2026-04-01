@@ -28,11 +28,8 @@ export default function (context: TemplateContext): string {
   },
   "tasks": {
     "test": "deno test --allow-read --coverage=coverage ./tests",
-    "coverage": "deno coverage coverage --lcov --output=coverage/lcov.info && deno coverage coverage",
-    "coverage:check": "deno coverage coverage --summary",
     "bench": "deno bench ./benchmarks",
     "fmt": "deno fmt",
-    "fmt:check": "deno fmt --check",
     "lint": "deno lint ./src ./tests ./benchmarks ./examples",
     "check": "deno check ./src/mod.ts",
     "ci": "deno task fmt && deno task lint --fix && deno task check && deno task test"

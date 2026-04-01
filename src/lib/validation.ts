@@ -76,7 +76,7 @@ export function validateGithubUser(githubUser: string): string {
     "githubUser",
   );
 
-  if (!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37})$/.test(normalizedGithubUser)) {
+  if (!/^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/.test(normalizedGithubUser)) {
     throw new ValidationError(
       "githubUser must be a plausible GitHub user or organization name.",
       { githubUser: normalizedGithubUser },
