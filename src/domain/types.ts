@@ -21,6 +21,7 @@ export interface InitCommandOptions {
   readonly securityEmail: string;
   readonly force: boolean;
   readonly dryRun: boolean;
+  readonly includeConfig: boolean;
 }
 
 /**
@@ -45,4 +46,5 @@ export interface TemplateContext {
   readonly securityEmail: string;
   readonly generatedAtIso: string;
   readonly currentYear: string;
+  readonly includeConfig: boolean;
 }

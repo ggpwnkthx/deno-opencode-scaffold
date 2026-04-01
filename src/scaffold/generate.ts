@@ -10,7 +10,7 @@ import type {
 } from "@scaffold/types";
 import { joinFsPath } from "../lib/path.ts";
 import { ensureWritableTarget, writeTextFile } from "../lib/fs.ts";
-import { renderTemplateFiles } from "./template-files.ts";
+import { loadTemplates } from "./template-registry.ts";
 
 /**
  * Summary of a scaffold operation.
@@ -39,6 +39,7 @@ export function createTemplateContext(
     securityEmail: options.securityEmail,
     generatedAtIso,
     currentYear: new Date(generatedAtIso).getUTCFullYear().toString(),
+    includeConfig: options.includeConfig,
   };
 }
 
@@ -49,7 +50,7 @@ export async function buildRenderedFiles(
   options: InitCommandOptions,
 ): Promise<readonly RenderedFile[]> {
   const context = createTemplateContext(options);
-  return await renderTemplateFiles(context);
+  return await loadTemplates(context);
 }
 
 /**

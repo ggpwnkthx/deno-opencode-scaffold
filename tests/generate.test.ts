@@ -16,6 +16,7 @@ Deno.test("initializeApp writes the required files and directories", async () =>
     securityEmail: "security@acme.test",
     force: false,
     dryRun: false,
+    includeConfig: true,
   });
 
   assert(result.files.length >= 20);
@@ -62,6 +63,7 @@ Deno.test("initializeApp renders README and deno.jsonc using input values", asyn
     securityEmail: "security@widgets.test",
     force: false,
     dryRun: false,
+    includeConfig: true,
   });
 
   const readme = await Deno.readTextFile(`${tempDirectory}/widget-kit/README.md`);
@@ -90,6 +92,7 @@ Deno.test("initializeApp dry-run reports files without writing", async () => {
     securityEmail: "security@demo.test",
     force: false,
     dryRun: true,
+    includeConfig: true,
   });
 
   assertEquals(result.dryRun, true);
@@ -126,6 +129,7 @@ Deno.test("initializeApp with targetDir '.' writes files to current directory", 
       securityEmail: "security@test.example",
       force: false,
       dryRun: false,
+      includeConfig: true,
     });
 
     assertEquals(result.targetDir, ".");
@@ -174,4 +178,134 @@ Deno.test("parseInitArgs normalizes underscores to hyphens in app names", () => 
   } finally {
     Deno.chdir(originalCwd);
   }
+});
+
+Deno.test("parseInitArgs defaults includeConfig to true", () => {
+  const options = parseInitArgs(["my-app"]);
+  assertEquals(options.includeConfig, true);
+});
+
+Deno.test("parseInitArgs sets includeConfig to false when --no-config is passed", () => {
+  const options = parseInitArgs(["my-app", "--no-config"]);
+  assertEquals(options.includeConfig, false);
+});
+
+Deno.test("initializeApp with includeConfig false skips config files", async () => {
+  const tempDirectory = await Deno.makeTempDir();
+
+  const result = await initializeApp({
+    appName: "no-config-app",
+    targetDir: `${tempDirectory}/no-config-app`,
+    scope: "@test",
+    githubUser: "test-user",
+    githubRepo: "no-config-app",
+    codeOwner: "@test/team",
+    securityEmail: "security@test.example",
+    force: false,
+    dryRun: false,
+    includeConfig: false,
+  });
+
+  const writtenPaths = result.files.map((f) => f.replace(/^.*\//, ""));
+
+  assert(
+    !writtenPaths.includes("config.ts"),
+    "src/core/config.ts should not be generated",
+  );
+  assert(
+    !writtenPaths.includes("config.test.ts"),
+    "tests/core/config.test.ts should not be generated",
+  );
+  assert(
+    !writtenPaths.includes("config.bench.ts"),
+    "benchmarks/config.bench.ts should not be generated",
+  );
+});
+
+Deno.test("initializeApp with includeConfig false generates src/mod.ts without config exports", async () => {
+  const tempDirectory = await Deno.makeTempDir();
+
+  await initializeApp({
+    appName: "no-config-app",
+    targetDir: `${tempDirectory}/no-config-app`,
+    scope: "@test",
+    githubUser: "test-user",
+    githubRepo: "no-config-app",
+    codeOwner: "@test/team",
+    securityEmail: "security@test.example",
+    force: false,
+    dryRun: false,
+    includeConfig: false,
+  });
+
+  const modTs = await Deno.readTextFile(`${tempDirectory}/no-config-app/src/mod.ts`);
+  assertStringIncludes(modTs, "// Config utilities were not generated");
+  assertStringIncludes(modTs, "@module");
+});
+
+Deno.test("initializeApp with includeConfig false generates deno.jsonc without config tasks", async () => {
+  const tempDirectory = await Deno.makeTempDir();
+
+  await initializeApp({
+    appName: "no-config-app",
+    targetDir: `${tempDirectory}/no-config-app`,
+    scope: "@test",
+    githubUser: "test-user",
+    githubRepo: "no-config-app",
+    codeOwner: "@test/team",
+    securityEmail: "security@test.example",
+    force: false,
+    dryRun: false,
+    includeConfig: false,
+  });
+
+  const denoJsonc = await Deno.readTextFile(
+    `${tempDirectory}/no-config-app/deno.jsonc`,
+  );
+  assertStringIncludes(denoJsonc, '"fmt"');
+  assertStringIncludes(denoJsonc, '"lint"');
+  assertStringIncludes(denoJsonc, '"check"');
+  assertStringIncludes(denoJsonc, '"ci"');
+  assert(!denoJsonc.includes('"test"'), "test task should not be generated");
+  assert(!denoJsonc.includes('"bench"'), "bench task should not be generated");
+});
+
+Deno.test("initializeApp with includeConfig false generates fewer files than with includeConfig true", async () => {
+  const tempDirectory = await Deno.makeTempDir();
+
+  const withConfig = await initializeApp({
+    appName: "with-config",
+    targetDir: `${tempDirectory}/with-config`,
+    scope: "@test",
+    githubUser: "test-user",
+    githubRepo: "with-config",
+    codeOwner: "@test/team",
+    securityEmail: "security@test.example",
+    force: false,
+    dryRun: false,
+    includeConfig: true,
+  });
+
+  const withoutConfig = await initializeApp({
+    appName: "without-config",
+    targetDir: `${tempDirectory}/without-config`,
+    scope: "@test",
+    githubUser: "test-user",
+    githubRepo: "without-config",
+    codeOwner: "@test/team",
+    securityEmail: "security@test.example",
+    force: false,
+    dryRun: false,
+    includeConfig: false,
+  });
+
+  assert(
+    withConfig.files.length > withoutConfig.files.length,
+    "includeConfig:true should generate more files than includeConfig:false",
+  );
+  assertEquals(
+    withConfig.files.length - withoutConfig.files.length,
+    3,
+    "difference should be exactly 3 (config.ts, config.test.ts, config.bench.ts)",
+  );
 });

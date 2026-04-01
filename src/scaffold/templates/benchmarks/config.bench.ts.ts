@@ -1,6 +1,9 @@
 import type { TemplateContext } from "@scaffold/types";
 
-export const metadata = { outputPath: "benchmarks/config.bench.ts" };
+export const metadata = {
+  outputPath: "benchmarks/config.bench.ts",
+  conditional: "config",
+};
 
 export default function (_context: TemplateContext): string {
   return `import { createConfig } from "../src/mod.ts";

@@ -26,6 +26,7 @@ interface RawFlags {
   force: boolean;
   dryRun: boolean;
   help: boolean;
+  noConfig: boolean;
 }
 
 const DEFAULT_SCOPE = "@your-scope";
@@ -55,6 +56,7 @@ Options:
   --dir <path>                 Custom destination directory
   --force                      Allow writing into a non-empty directory
   --dry-run                    Print planned writes without touching disk
+  --no-config                  Skip generating config utilities (src/core/config.ts, tests, benchmarks)
   --help                       Show this help text
 
 Permissions:
@@ -80,6 +82,7 @@ function parseFlags(
     force: false,
     dryRun: false,
     help: false,
+    noConfig: false,
   };
   const consumed = new Set<number>();
 
@@ -125,6 +128,9 @@ function parseFlags(
       case "--help":
         flags.help = true;
         break;
+      case "--no-config":
+        flags.noConfig = true;
+        break;
       default:
         throw new ValidationError(`Unknown flag: ${value}`, { flag: value });
     }
@@ -165,6 +171,7 @@ export function parseInitArgs(args: readonly string[]): InitCommandOptions {
     ),
     force: flags.force,
     dryRun: flags.dryRun,
+    includeConfig: !flags.noConfig,
   };
 }
 

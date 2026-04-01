@@ -1,6 +1,6 @@
 import type { TemplateContext } from "@scaffold/types";
 
-export const metadata = { outputPath: "src/core/config.ts" };
+export const metadata = { outputPath: "src/core/config.ts", conditional: "config" };
 
 export default function (_context: TemplateContext): string {
   return `/**

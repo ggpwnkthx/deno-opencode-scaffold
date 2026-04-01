@@ -57,6 +57,7 @@ Note: Underscores in app names are normalized to hyphens (e.g., `my_app` becomes
 - `--security-email <email>`: value written to `SECURITY.md`
 - `--force`: allow writing into a non-empty target directory
 - `--dry-run`: print what would be written without touching disk
+- `--no-config`: skip generating config utilities (`src/core/config.ts`, `tests`, `benchmarks`)
 - `--help`: show CLI help
 
 ## Required permissions

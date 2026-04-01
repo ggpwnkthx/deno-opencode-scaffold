@@ -6,8 +6,10 @@
 
 import type { RenderedFile, TemplateContext } from "@scaffold/types";
 
+type FeatureFlag = "config";
+
 interface TemplateModule {
-  metadata: { outputPath: string };
+  metadata: { outputPath: string; conditional?: FeatureFlag };
   default: (context: TemplateContext) => string;
 }
 
@@ -87,6 +89,9 @@ export function loadTemplates(
   const renderedFiles: RenderedFile[] = [];
 
   for (const module of templateModules) {
+    if (module.metadata.conditional && !context.includeConfig) {
+      continue;
+    }
     const content = module.default(context);
     renderedFiles.push({
       path: module.metadata.outputPath,
@@ -96,31 +101,3 @@ export function loadTemplates(
 
   return renderedFiles;
 }
-
-export const templatePaths = [
-  "./templates/AGENTS.md.ts",
-  "./templates/CHANGELOG.md.ts",
-  "./templates/CONTRIBUTING.md.ts",
-  "./templates/CONVENTIONAL_COMMITS.md.ts",
-  "./templates/LICENSE.md.ts",
-  "./templates/README.md.ts",
-  "./templates/SECURITY.md.ts",
-  "./templates/benchmarks/config.bench.ts.ts",
-  "./templates/deno.jsonc.ts",
-  "./templates/examples/basic.ts.ts",
-  "./templates/gitattributes.ts",
-  "./templates/gitignore.ts",
-  "./templates/.opencode/settings.json.ts",
-  "./templates/src/core/config.ts.ts",
-  "./templates/src/mod.ts.ts",
-  "./templates/tests/core/config.test.ts.ts",
-  "./templates/.devcontainer/Dockerfile.ts",
-  "./templates/.devcontainer/devcontainer.json.ts",
-  "./templates/.github/CODEOWNERS.ts",
-  "./templates/.github/dependabot.yml.ts",
-  "./templates/.github/workflows/ci.yml.ts",
-  "./templates/.opencode/plugins/deno-guards.ts",
-  "./templates/.opencode/plugins/code-grade.ts",
-  "./templates/.vscode/extensions.json.ts",
-  "./templates/.vscode/settings.json.ts",
-] as const;
