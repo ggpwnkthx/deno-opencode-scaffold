@@ -5,7 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.10] - 2026-04-01
+## [0.2.11] - 2026-04-01
+
+### Changed
+
+- Refactored `deno-guards.ts` plugin to use new OpenCode event-based API
+- Added `OPENCODE_CONFIG` environment variable to Dockerfile for OpenCode configuration path
+- Split lint task into `lint` (with --fix) and `lint:check` (without --fix)
+- Updated CI task to run lint:check and coverage:check
+
+### Added
+
+- New `coverage` and `coverage:check` tasks for LCOV coverage reporting
+- Added instruction to `code-grade.ts` plugin to inspect current diff before grading
+- New test suite in `tests/domain/` and `tests/lib/` directories
+- New `scripts/coverage_check.ts` for coverage threshold verification
 
 ### Changed
 

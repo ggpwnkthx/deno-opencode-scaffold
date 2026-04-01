@@ -1,158 +1,65 @@
 import type { Plugin } from "@opencode-ai/plugin";
-import { spawn } from "node:child_process";
-import path from "node:path";
 
-const DENO_EXTENSIONS = new Set([".ts", ".tsx"]);
-const EDIT_TOOLS = new Set(["write", "edit", "patch", "multiedit"]);
+export const DenoEnforcePlugin: Plugin = async ({ $, client, worktree }) => {
+  let changed = false;
+  let running = false;
 
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === "object" && v !== null;
-}
-
-function asString(v: unknown): string | undefined {
-  return typeof v === "string" ? v : undefined;
-}
-
-function getNestedString(obj: unknown, ...keys: string[]): string | undefined {
-  let cur: unknown = obj;
-  for (const key of keys) {
-    if (!isRecord(cur)) return undefined;
-    cur = cur[key];
-  }
-  return asString(cur);
-}
-
-function getFilePath(input: unknown, output: unknown): string | undefined {
-  return (
-    getNestedString(output, "args", "filePath")
-      ?? getNestedString(output, "args", "path")
-      ?? getNestedString(output, "args", "newPath")
-      ?? getNestedString(input, "args", "filePath")
-      ?? getNestedString(input, "args", "path")
-      ?? getNestedString(input, "args", "newPath")
-      ?? getNestedString(input, "filePath")
-      ?? getNestedString(input, "path")
-  );
-}
-
-function isDenoFile(filePath: string | undefined): filePath is string {
-  return !!filePath && DENO_EXTENSIONS.has(path.extname(filePath));
-}
-
-async function runCommand(
-  args: string[],
-  cwd: string,
-): Promise<{ code: number; stdout: string; stderr: string }> {
-  return await new Promise((resolve, reject) => {
-    const child = spawn(args[0], args.slice(1), {
-      cwd,
-      stdio: ["ignore", "pipe", "pipe"],
+  const log = async (
+    level: "debug" | "info" | "warn" | "error",
+    message: string,
+    extra?: Record<string, unknown>,
+  ) => {
+    await client.app.log({
+      body: {
+        service: "deno-guards",
+        level,
+        message,
+        extra,
+      },
     });
+  };
 
-    let stdout = "";
-    let stderr = "";
+  const runChecks = async () => {
+    if (running) return;
+    running = true;
 
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk.toString();
-    });
+    const cacheDir = `${worktree}/.opencode/.cache`;
+    const lintLog = `${cacheDir}/deno-lint.log`;
+    const checkLog = `${cacheDir}/deno-check.log`;
 
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk.toString();
-    });
+    try {
+      await $`mkdir -p ${cacheDir}`.quiet();
 
-    child.on("error", reject);
-    child.on("close", (code) => {
-      resolve({
-        code: code ?? 1,
-        stdout,
-        stderr,
+      await $`deno lint &> ${lintLog}`.cwd(worktree).quiet();
+      await $`deno check &> ${checkLog}`.cwd(worktree).quiet();
+
+      await log("info", "deno lint + deno check passed");
+    } catch (err) {
+      const [lintOutput, checkOutput] = await Promise.all([
+        $`cat ${lintLog}`.quiet().text().catch(() => ""),
+        $`cat ${checkLog}`.quiet().text().catch(() => ""),
+      ]);
+
+      await log("error", "Deno validation failed", {
+        error: err instanceof Error ? err.message : String(err),
+        lintOutput: lintOutput.slice(0, 8000),
+        checkOutput: checkOutput.slice(0, 8000),
       });
-    });
-  });
-}
+    } finally {
+      running = false;
+    }
+  };
 
-function formatFailure(params: {
-  cmd: string[];
-  exitCode: number;
-  toolName?: string;
-  filePath?: string;
-  stdout: string;
-  stderr: string;
-}): string {
-  const header = [
-    `❌ ${params.cmd.join(" ")} failed (exit code ${params.exitCode})`,
-    params.toolName ? `Tool: ${params.toolName}` : undefined,
-    params.filePath ? `File: ${params.filePath}` : undefined,
-  ].filter(Boolean).join("\n");
-
-  const stdoutBlock = params.stdout.trim()
-    ? `\n\n--- stdout ---\n${params.stdout.trimEnd()}`
-    : "";
-
-  const stderrBlock = params.stderr.trim()
-    ? `\n\n--- stderr ---\n${params.stderr.trimEnd()}`
-    : "";
-
-  return `${header}${stdoutBlock}${stderrBlock}`.trimEnd();
-}
-
-async function runOrBlock(
-  cmd: string[],
-  cwd: string,
-  toolName?: string,
-  filePath?: string,
-) {
-  const res = await runCommand(cmd, cwd);
-
-  if (res.code !== 0) {
-    throw new Error(
-      formatFailure({
-        cmd,
-        exitCode: res.code,
-        toolName,
-        filePath,
-        stdout: res.stdout,
-        stderr: res.stderr,
-      }),
-    );
-  }
-}
-
-const LINT_PATTERNS = ["./src", "./tests", "./benchmarks", "./examples"];
-const CHECK_PATTERN = "./src";
-
-export const DenoGuards: Plugin = async ({
-  directory,
-}: {
-  directory: string;
-}) => {
-  await Promise.resolve();
   return {
-    "tool.execute.after": async (
-      input: Record<string, unknown>,
-      _output: Record<string, unknown>,
-    ) => {
-      const toolName = asString(input?.tool);
-      if (!toolName || !EDIT_TOOLS.has(toolName)) return;
+    event: async ({ event }) => {
+      if (event.type === "file.edited") {
+        changed = true;
+      }
 
-      const filePath = getFilePath(input, _output);
-      if (!isDenoFile(filePath)) return;
-
-      await runOrBlock(
-        ["deno", "lint", "--fix", ...LINT_PATTERNS],
-        directory,
-        toolName,
-        filePath,
-      );
-
-      await runOrBlock(
-        ["deno", "check", CHECK_PATTERN],
-        directory,
-        toolName,
-        filePath,
-      );
+      if (event.type === "session.idle" && changed) {
+        changed = false;
+        await runChecks();
+      }
     },
   };
 };
-
-export default DenoGuards;

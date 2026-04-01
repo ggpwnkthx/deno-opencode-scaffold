@@ -1,6 +1,6 @@
 {
   "name": "@ggpwnkthx/opencode-scaffold",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "A simple scaffold for projects built with OpenCode.",
   "exports": "./src/main.ts",
   "imports": {
@@ -28,10 +28,13 @@
     "dev": "deno run --allow-read --allow-write ./src/main.ts",
     "fmt": "deno fmt",
     "fmt:check": "deno fmt --check",
-    "lint": "deno lint ./src ./tests",
-    "check": "deno check ./src/main.ts",
-    "test": "deno test --allow-read --allow-write ./tests",
+    "lint": "deno lint ./src ./tests --fix",
+    "lint:check": "deno lint ./src ./tests",
+    "check": "deno check ./src ./tests",
+    "test": "deno test --allow-read --allow-write --coverage=coverage",
+    "coverage": "deno coverage coverage --lcov --output=coverage/lcov.info && deno coverage coverage",
+    "coverage:check": "deno run --allow-read scripts/coverage_check.ts coverage/lcov.info 70",
     "build": "deno compile --allow-read --allow-write --output=dist/scaffold ./src/main.ts",
-    "ci": "deno task fmt && deno task lint --fix && deno task check && deno task test"
+    "ci": "deno task fmt && deno task lint:check && deno task check && deno task coverage:check && deno task test"
   }
 }

@@ -1,9 +1,4 @@
-import type { TemplateContext } from "@scaffold/types";
-
-export const metadata = { outputPath: ".opencode/plugins/code-grade.ts" };
-
-export default function (_context: TemplateContext): string {
-  return `import type { Plugin } from "@opencode-ai/plugin";
+import type { Plugin } from "@opencode-ai/plugin";
 
 const MAX_CONTEXT_FILES = 8;
 const MAX_RECENT_FILES = 25;
@@ -152,7 +147,7 @@ async function getChangedFiles(
         ]);
 
         if (exitCode !== 0) {
-            await log("warn", \`Git command failed: \${cmd.join(" ")}\`, {
+            await log("warn", `Git command failed: ${cmd.join(" ")}`, {
                 exitCode,
                 stderr: stderr.slice(0, 500),
             });
@@ -230,7 +225,7 @@ function scoreProjectFile(
         score += 8;
     }
 
-    if (/\/(src|app|server|packages|lib)\//.test(\`/\${normalized}\`)) {
+    if (/\/(src|app|server|packages|lib)\//.test(`/${normalized}`)) {
         score += 6;
     }
 
@@ -273,7 +268,7 @@ function isReviewableFile(path: string): boolean {
         return false;
     }
 
-    return /\.(ts|tsx|js|jsx|mts|cts|mjs|cjs|go|rs|py|java|kt|swift|php|rb|cs)\$/
+    return /\.(ts|tsx|js|jsx|mts|cts|mjs|cjs|go|rs|py|java|kt|swift|php|rb|cs)$/
         .test(
             normalized,
         );
@@ -285,29 +280,28 @@ function buildProjectReviewPrompt(
 ): string {
     const referencedFiles = reviewFiles.length === 0
         ? "none"
-        : reviewFiles.map((file) => \`@\${file}\`).join(" ");
+        : reviewFiles.map((file) => `@${file}`).join(" ");
 
     const reviewFileList = reviewFiles.length === 0
         ? "- None"
-        : reviewFiles.map((file) => \`- @\${file}\`).join("\n");
+        : reviewFiles.map((file) => `- @${file}`).join("\n");
 
     const omittedFiles = changedFiles.filter((file) => !reviewFiles.includes(file));
     const omittedFileList = omittedFiles.length === 0
         ? "- None"
-        : omittedFiles.map((file) => \`- \${file}\`).join("\n");
+        : omittedFiles.map((file) => `- ${file}`).join("\n");
 
     return [
         "Perform a strict code-quality review of the current change set.",
         "",
-        \`Total changed files detected: \${changedFiles.length}\`,
+        `Total changed files detected: ${changedFiles.length}`,
         "",
         reviewFiles.length > 0
-            ? \`Referenced files for direct inspection: \${referencedFiles}\`
+            ? `Referenced files for direct inspection: ${referencedFiles}`
             : "Referenced files for direct inspection: none",
         "",
         "Review instructions:",
         "- Grade the work heuristically at the project level, not as a review of one file.",
-        "- Inspect the current diff across the referenced files before grading.",
         "- Use architecture, boundary design, data flow, and consistency across files to infer project quality.",
         "- Do not anchor on the most recently edited file or any single file unless it is clearly the dominant risk.",
         "- Do not make code changes. Review only.",
@@ -361,6 +355,4 @@ function buildProjectReviewPrompt(
         "Additional changed files not directly referenced:",
         omittedFileList,
     ].join("\n");
-}
-`;
 }
