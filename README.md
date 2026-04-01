@@ -4,12 +4,12 @@ A Deno v2.7+ CLI that initializes a new repository with template files:
 
 - `.devcontainer/`
 - `.github/`
+- `.opencode/settings.json`
 - `.opencode/plugins/`
 - `.vscode/`
 - `.gitattributes`
 - `.gitignore`
 - all root `*.md` files
-- `opencode.json`
 - a freshly generated `deno.jsonc`
 
 It also creates a small `src/`, `tests/`, `benchmarks/`, and `examples/` tree in the generated app so the emitted Deno tasks are immediately usable.
@@ -19,25 +19,25 @@ It also creates a small `src/`, `tests/`, `benchmarks/`, and `examples/` tree in
 Initialize in a new directory:
 
 ```bash
-deno run --allow-read --allow-write jsr:@ggpwnkthx/opencode-scaffold init my-app
+deno run --allow-read --allow-write ./src/main.ts init my-app
 ```
 
 Initialize in the current directory (uses the directory name as the app name):
 
 ```bash
-deno run --allow-read --allow-write jsr:@ggpwnkthx/opencode-scaffold init
+deno run --allow-read --allow-write ./src/main.ts init
 ```
 
 Initialize in the current directory explicitly:
 
 ```bash
-deno run --allow-read --allow-write jsr:@ggpwnkthx/opencode-scaffold init .
+deno run --allow-read --allow-write ./src/main.ts init .
 ```
 
 With options:
 
 ```bash
-deno run --allow-read --allow-write jsr:@ggpwnkthx/opencode-scaffold init my-app \
+deno run --allow-read --allow-write ./src/main.ts init my-app \
   --scope @acme \
   --github-user acme \
   --github-repo my-app \

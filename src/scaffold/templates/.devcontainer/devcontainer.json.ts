@@ -2,9 +2,9 @@ import type { TemplateContext } from "@scaffold/types";
 
 export const metadata = { outputPath: ".devcontainer/devcontainer.json" };
 
-export default function (_context: TemplateContext): string {
+export default function (context: TemplateContext): string {
   return `{
-  "name": "base-deno",
+  "name": "${context.githubRepo}",
   "build": {
     "dockerfile": "Dockerfile"
   },

@@ -1,6 +1,6 @@
 import type { TemplateContext } from "@scaffold/types";
 
-export const metadata = { outputPath: "opencode.json" };
+export const metadata = { outputPath: ".opencode/settings.json" };
 
 export default function (_context: TemplateContext): string {
   return `{

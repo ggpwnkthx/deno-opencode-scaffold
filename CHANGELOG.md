@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.10] - 2026-04-01
+
+### Changed
+
+- Renamed `opencode.json` template to `.opencode/settings.json` for proper dotfile organization
+- Renamed `deno-guards.ts.ts` template to `.opencode/plugins/deno-guards.ts` removing redundant extension
+- Updated README examples to use local path instead of JSR package
+- Updated `.devcontainer/devcontainer.json` to use project-specific name
+
+### Added
+
+- New `code-grade.ts` plugin template for code grading functionality
+- Added `OPENCODE_CONFIG` environment variable to Dockerfile for OpenCode configuration path
+
 ## [0.2.9] - 2026-03-31
 
 ### Changed

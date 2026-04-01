@@ -27,6 +27,8 @@ Deno.test("initializeApp writes the required files and directories", async () =>
     ".github/CODEOWNERS",
     ".github/dependabot.yml",
     ".opencode/plugins/deno-guards.ts",
+    ".opencode/plugins/code-grade.ts",
+    ".opencode/settings.json",
     ".vscode/settings.json",
     ".gitattributes",
     ".gitignore",
@@ -37,7 +39,6 @@ Deno.test("initializeApp writes the required files and directories", async () =>
     "LICENSE.md",
     "README.md",
     "SECURITY.md",
-    "opencode.json",
     "deno.jsonc",
   ];
 

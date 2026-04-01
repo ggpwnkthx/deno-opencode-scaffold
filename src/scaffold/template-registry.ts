@@ -19,7 +19,7 @@ import * as LICENSE from "./templates/LICENSE.md.ts";
 import * as README from "./templates/README.md.ts";
 import * as SECURITY from "./templates/SECURITY.md.ts";
 import * as BENCH_CONFIG from "./templates/benchmarks/config.bench.ts.ts";
-import * as DENO_JSONC from "./templates/deno-jsonc.ts";
+import * as DENO_JSONC from "./templates/deno.jsonc.ts";
 import * as EXAMPLES_BASIC from "./templates/examples/basic.ts.ts";
 import * as GITATTRIBUTES from "./templates/gitattributes.ts";
 import * as GITIGNORE from "./templates/gitignore.ts";
@@ -106,7 +106,7 @@ export const templatePaths = [
   "./templates/README.md.ts",
   "./templates/SECURITY.md.ts",
   "./templates/benchmarks/config.bench.ts.ts",
-  "./templates/deno-jsonc.ts",
+  "./templates/deno.jsonc.ts",
   "./templates/examples/basic.ts.ts",
   "./templates/gitattributes.ts",
   "./templates/gitignore.ts",

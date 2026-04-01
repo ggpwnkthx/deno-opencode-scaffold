@@ -1,6 +1,6 @@
 import type { TemplateContext } from "@scaffold/types";
 
-export const metadata = { outputPath: ".opencode/plugins/deno-guards.ts" };
+export const metadata = { outputPath: ".opencode/plugins/code-grade.ts" };
 
 export default function (_context: TemplateContext): string {
   return `import type { Plugin } from "@opencode-ai/plugin";
